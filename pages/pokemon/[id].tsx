@@ -8,6 +8,7 @@ import confetti from "canvas-confetti";
 import { Layout } from "../../components/layouts";
 import { Pokemon } from "../../interfaces";
 import { getPokemonInfo, localFavorites } from "../../utils";
+import { blob } from "node:stream/consumers";
 
 interface Props {
   pokemon: Pokemon;
@@ -113,13 +114,13 @@ export const PokemonPage: NextPage<Props> = ({ pokemon }) => {
 // You should use getStaticPaths if you’re statically pre-rendering pages that use dynamic routes
 
 export const getStaticPaths: GetStaticPaths = async (ctx) => {
-  console.log(">>>>>>", ctx);
   const pokemons151 = [...Array(151)].map((value, index) => `${index + 1}`);
   return {
     paths: pokemons151.map((id) => ({
       params: { id },
     })),
-    fallback: false,
+    // fallback: false, //Retorna un 404 al no tener o no enconotrar en el array de pokemons151 el id
+    fallback: "blocking", //continua con la ejecución pasando por parámetro el id dado
   };
 };
 
@@ -128,10 +129,21 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   const pokemon = await getPokemonInfo(id);
 
+  if (!pokemon) {
+    return {
+      redirect: {
+        //Validació para el incremental static generatiton, si el pokemon no existe lo mandará a una la página del home, de lo contrario retorna el pokemon buscado
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   return {
     props: {
       pokemon,
     },
+    // revalidate: 10
   };
 };
 
