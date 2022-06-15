@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Navbar } from "../ui";
 
 type Props = {
-  children: React.Element;
+  children: React.ReactNode;
   title?: string;
 };
 
